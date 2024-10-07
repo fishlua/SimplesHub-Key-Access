@@ -1,0 +1,135 @@
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 250, 0, 80)
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -40)
+mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.3
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+local mainFrameCorner = Instance.new("UICorner")
+mainFrameCorner.CornerRadius = UDim.new(0, 10)
+mainFrameCorner.Parent = mainFrame
+
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 30)
+topBar.Position = UDim2.new(0, 0, 0, 0)
+topBar.BackgroundColor3 = Color3.new(0, 0, 0)
+topBar.BackgroundTransparency = 0.25
+topBar.BorderSizePixel = 0
+topBar.Parent = mainFrame
+
+topBar.Active = true
+topBar.Draggable = false
+
+local topBarCorner = Instance.new("UICorner")
+topBarCorner.CornerRadius = UDim.new(0, 10)
+topBarCorner.Parent = topBar
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -40, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
+titleLabel.Text = "Access Key"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextScaled = true
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.BackgroundTransparency = 1
+titleLabel.TextStrokeTransparency = 0.75
+titleLabel.Parent = topBar
+
+local exitButton = Instance.new("TextButton")
+exitButton.Size = UDim2.new(0, 28.5, 1, 0)
+exitButton.Position = UDim2.new(1, -30, 0, 0)
+exitButton.Text = "X"
+exitButton.TextColor3 = Color3.new(1, 0.2, 0.2)
+exitButton.BackgroundColor3 = Color3.new(0, 0, 0)
+exitButton.BackgroundTransparency = 0.2
+exitButton.Font = Enum.Font.GothamBold
+exitButton.TextScaled = true
+exitButton.Parent = topBar
+
+exitButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+local copyButton = Instance.new("TextButton")
+copyButton.Size = UDim2.new(0, 180, 0, 30)
+copyButton.Position = UDim2.new(0.5, -90, 0.5, 0)
+copyButton.Text = "Copy Link"
+copyButton.TextColor3 = Color3.new(1, 1, 1)
+copyButton.BackgroundColor3 = Color3.fromRGB(244, 81, 68)  
+copyButton.Font = Enum.Font.GothamBold
+copyButton.TextScaled = true
+copyButton.Parent = mainFrame
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 8)
+buttonCorner.Parent = copyButton
+
+local function copyToClipboard()
+    local link = "https://discord.gg/hE6aByUZZF"
+    setclipboard(link)
+    
+    local notification = Instance.new("TextLabel")
+    notification.Size = UDim2.new(0, 250, 0, 40)
+    notification.Position = UDim2.new(0.5, -125, 0.6, 30)
+    notification.Text = "Copied link to clipboard!"
+    notification.TextColor3 = Color3.new(1, 1, 1)
+    notification.BackgroundColor3 = Color3.new(0, 0, 0)
+    notification.BackgroundTransparency = 0.5
+    notification.Font = Enum.Font.Gotham
+    notification.TextScaled = true
+    notification.Parent = screenGui
+    
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 8)
+buttonCorner.Parent = notification
+
+    wait(2)
+    for i = 1, 10 do
+        notification.TextTransparency = i * 0.1
+        notification.BackgroundTransparency = 0.5 + i * 0.05
+        wait(0.1)
+    end
+    notification:Destroy()
+end
+
+copyButton.MouseButton1Click:Connect(copyToClipboard)
+
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function updateInput(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+topBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+topBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateInput(input)
+    end
+end)
